@@ -1,4 +1,8 @@
-Step 0 
+Note: to avoid the hassles of compiling Viewpoints for modern platforms, there is now a version which runs in a Docker container. See docker/DOCKER_INSTALL.
+
+
+
+Step 0
 
 on Mac OS X systems, and perhaps others, optionally put the
 following into your ~/.cshrc file.  It will greatly speed up
@@ -20,7 +24,7 @@ download the latest stable fltk-1.3 from http://fltk.org/software.php
   (vp does not build with fltk 2.0, yet)
 expand
 cd
-./configure 
+./configure
 make
 sudo make install
 
@@ -33,8 +37,8 @@ expand
 cd
 ./configure
 edit source code to remove bogus "include <values.h>" if necessary
-make  
-  don't worry if flews test doesn't link.  it is not necessary for vp.  
+make
+  don't worry if flews test doesn't link.  it is not necessary for vp.
   If you want to test flews, edit the flews makefile to have the correct locations
 
 If you used Github version, symlink: ln -s FL_Flews flews-0.3.1
@@ -69,7 +73,7 @@ Step 5.1
 Download, build, and install boost, see: http://www.boost.org/users/download/
 Since vp uses the boost serialization library, you do have to build boost.  The "header only" libraries are not adequate.
 ./configure
-make  
+make
 
 The above takes a while.  Perhaps someone can insert the instruction
 for building only the static, single-threaded, serialization library)
@@ -104,7 +108,3 @@ test vp, eg. "vp -i sampledata.txt"
 Step 8
 
 Do some real work.
-
-
-
-

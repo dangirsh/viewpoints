@@ -16,7 +16,7 @@ endif
 DEBUG		= -gfull -ggdb -Wall -Wunused -Wconversion -fexceptions
 
 
-CXXFLAGS_ADD	= 
+CXXFLAGS_ADD	=
 LDFLAGS_ADD	=
 
 # compiling on Apple OSX (darwin)
@@ -50,7 +50,7 @@ ifeq ($(platform),Darwin)
 	LDLIBS = -framework Foundation -framework AGL -framework OpenGL -framework Carbon -framework Cocoa -framework ApplicationServices -framework vecLib -framework AudioToolbox -lgsl -lgslcblas -lm -lmx -lcfitsio
 
 # for OSX machines where I CAN install things as root... (don't forget to build all libraries as static only)
-	INCPATH = -I/usr/local/include -I/sw/include 
+	INCPATH = -I/usr/local/include -I/sw/include
 	LIBPATH	= -L/usr/local/lib -L/sw/lib
 
 else
@@ -59,19 +59,19 @@ else
 	LIBPATH	= -L$$HOME/lib -L/usr/X11R6/lib
 	LDLIBS = -lGL -lGLU -lXft -lXext -lm -lgsl -lgslcblas -lCCfits -lcfitsio
 # for debugging
-#	LDLIBS = -lGLU -lGL -lXext -lm -lgsl -lefence -lpthread  
+#	LDLIBS = -lGLU -lGL -lXext -lm -lgsl -lefence -lpthread
 endif
 
 INCFLEWS	= -I../flews-0.3.1
 
 LINKFLEWS	= -L../flews-0.3.1 -lflews
-LINKFLTK	= -lfltk -lfltk_gl
+LINKFLTK	= -lfltk_images -lfltk -lfltk_gl
 LINKBLITZ	= -lblitz
 
 LDFLAGS		= $(LIBPATH) $(LINKFLEWS) $(LINKFLTK) $(LINKBLITZ) $(LDLIBS) $(LDFLAGS_ADD)
 
 # The extension to use for executables...
-EXEEXT		= 
+EXEEXT		=
 
 SRCS =	vp.cpp global_definitions_vp.cpp control_panel_window.cpp plot_window.cpp data_file_manager.cpp Vp_File_Chooser.cpp \
 	symbol_menu.cpp sprite_textures.cpp unescape.cpp brush.cpp Vp_Color_Chooser.cpp column_info.cpp
@@ -80,13 +80,13 @@ OBJS:=	$(SRCS:.cpp=.o)
 
 TARGET = vp$(EXEEXT)
 
-DOCUMENTATION = README vp_help_manual.htm sampledata.txt 
+DOCUMENTATION = README vp_help_manual.htm sampledata.txt
 
 default: $(TARGET)
 
-all: depend tags $(TARGET) 
+all: depend tags $(TARGET)
 
-%.o : %.c	
+%.o : %.c
 	echo Compiling $<...
 	$(CC) -I.. $(CFLAGS) -c $<
 
@@ -100,7 +100,7 @@ $(TARGET):	$(OBJS)
 	$(POSTBUILD)
 
 clean:
-	rm -f $(ALL) *.o $(TARGET) vp core* TAGS *.gch makedepend 
+	rm -f $(ALL) *.o $(TARGET) vp core* TAGS *.gch makedepend
 
 depend:	$(SRCS)
 	$(MAKEDEPEND) $(INCBLITZ) $(INCPATH) $(INCFLEWS) $(SRCS) > makedepend
