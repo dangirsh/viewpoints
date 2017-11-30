@@ -11,7 +11,7 @@
 //
 // Required packages
 //    FLTK 1.1.6 -- Fast Light Toolkit graphics package
-//    FLEWS 0.3 -- Extensions to FLTK
+//    FLEWS 0.3 -- Extensions to FLTK 
 //    OGLEXP 1.2.2 -- Access to OpenGL extension under Windows
 //    GSL 1.6 -- Gnu Scientific Library package for Windows
 //    Blitz++ 0.9 -- Various math routines
@@ -61,12 +61,12 @@
 int Plot_Window::count = 0;
 
 // Initial fraction of the window to be used for showing (normalized) data
-float const Plot_Window::initial_pscale = 0.8;
+float const Plot_Window::initial_pscale = 0.8; 
 
 //GLfloat Plot_Window::texenvcolor[ 4] = { 1, 1, 1, 1};
 
 // 2D array that holds indices of vertices for each brush
-blitz::Array<unsigned int,2> Plot_Window::indices_selected(NBRUSHES,1);
+blitz::Array<unsigned int,2> Plot_Window::indices_selected(NBRUSHES,1); 
 
 GLuint Plot_Window::spriteTextureID[NSYMBOLS];
 GLubyte* Plot_Window::spriteData[NSYMBOLS];
@@ -81,14 +81,14 @@ int Plot_Window::indexVBOsfilled = 0;
 // NOTE: Is it a good idea to do this here rather than global_definitions.h?
 void circular_shift(
   blitz::Array<float,1> dst, blitz::Array<float,1> src, const int shift);
-void moving_average(
-  blitz::Array<float,1> a, const blitz::Array<int,1> indices,
+void moving_average( 
+  blitz::Array<float,1> a, const blitz::Array<int,1> indices, 
   const int half_width);
 void cummulative_conditional(
-  blitz::Array<float,1> a, const blitz::Array<int,1> indices,
+  blitz::Array<float,1> a, const blitz::Array<int,1> indices, 
   const int half_width);
 void fluctuation(
-  blitz::Array<float,1> a, const blitz::Array<int,1> indices,
+  blitz::Array<float,1> a, const blitz::Array<int,1> indices, 
   const int half_width);
 double nicenum( const double xx, const double round);
 
@@ -102,10 +102,10 @@ Plot_Window::Plot_Window() : Fl_Gl_Window( 10, 10),
 {}
 
 //***************************************************************************
-// Plot_Window::Plot_Window( w, h) -- Constructor.  Increment count of plot
+// Plot_Window::Plot_Window( w, h) -- Constructor.  Increment count of plot 
 // windows, resize arrays, and set mode.  This constructor sets a flag to
 // tell the package to show the windows as part on a RESET_VIEW operation.
-Plot_Window::Plot_Window( int w, int h, int new_index) :
+Plot_Window::Plot_Window( int w, int h, int new_index) : 
   Fl_Gl_Window( w, h), do_reset_view_with_show( 0)
 {
   // Set flag, update count, and invoke initialzation method
@@ -115,7 +115,7 @@ Plot_Window::Plot_Window( int w, int h, int new_index) :
 }
 
 //***************************************************************************
-// Plot_Window::initialize() -- Initialize window parameters.  Set flags,
+// Plot_Window::initialize() -- Initialize window parameters.  Set flags, 
 // set set framebuffer modes, set up openGL context.
 void Plot_Window::initialize()
 {
@@ -158,7 +158,7 @@ void Plot_Window::initialize()
     cerr << "Error: can not allocate double buffered RGBA window for plot window " << index << endl;
     exit (-1);
   }
-
+    
   indexVBOsinitialized=0;
   sprites_initialized=0;
 
@@ -176,7 +176,7 @@ void Plot_Window::make_state()
 }
 
 //***************************************************************************
-// Plot_Window::copy_state( &pw) -- Copy state parameters from another
+// Plot_Window::copy_state( &pw) -- Copy state parameters from another 
 // object that has been created by serialization.
 void Plot_Window::copy_state( Plot_Window* pw)
 {
@@ -188,7 +188,7 @@ void Plot_Window::copy_state( Plot_Window* pw)
 }
 
 //***************************************************************************
-// Plot_Window::load_state() -- Load state parameters into widgets.
+// Plot_Window::load_state() -- Load state parameters into widgets.  
 // WARNING: There is no proetction against bad state parameters or the
 // possibility that this might be a default object without widgets.
 void Plot_Window::load_state()
@@ -203,13 +203,13 @@ void Plot_Window::load_state()
 }
 
 //***************************************************************************
-// Plot_Window::change_axes() -- Change axes for a plot to new axes which are
+// Plot_Window::change_axes() -- Change axes for a plot to new axes which are 
 // (probably) not duplicates.
 void Plot_Window::change_axes( int nchange)
 {
   nchange = 0;
 
-  // Loop: Examine control panel tabs and increment axis counts only for plots
+  // Loop: Examine control panel tabs and increment axis counts only for plots 
   // with x or y axis unlocked.  This is not ideal.
   for( int i=0; i<nplots; i++) {
     if( !cps[i]->lock_axis1_button->value() || !cps[i]->lock_axis2_button->value())
@@ -217,8 +217,8 @@ void Plot_Window::change_axes( int nchange)
   }
   // cout << "for window " << index << " nchange=" << nchange << endl;
 
-  // Get variable indices for this panel, then change variable indices for
-  // axes that are not locked.  MCL observes that this code seems a little
+  // Get variable indices for this panel, then change variable indices for 
+  // axes that are not locked.  MCL observes that this code seems a little 
   // verbose
   int i=cp->varindex1->value();
   int j=cp->varindex2->value();
@@ -228,7 +228,7 @@ void Plot_Window::change_axes( int nchange)
     for( int k=0; k<nchange; k++) upper_triangle_incr( i, j, nvars);
     cp->varindex1->value(i);
     cp->varindex2->value(j);
-  }
+  } 
   else if (!cp->lock_axis1_button->value()) {
     for( int k=0; k<nchange; k++) {
       i = (i+1)%nvars;
@@ -247,56 +247,56 @@ void Plot_Window::change_axes( int nchange)
 }
 
 //***************************************************************************
-// Plot_Window::update_linked_transforms() -- Use current plot's scale and
-// offset to update all the others that show (any of) the same axes (using
+// Plot_Window::update_linked_transforms() -- Use current plot's scale and 
+// offset to update all the others that show (any of) the same axes (using 
 // the same normalization).
 void Plot_Window::update_linked_transforms()
 {
   if( !link_all_axes_button->value()) return;
 
   // Get this plot's axis indices and normalization styles
-  int axis1=cp->varindex1->value();
+  int axis1=cp->varindex1->value(); 
   int style1 = cp->x_normalization_style->value();
-  int axis2=cp->varindex2->value();
+  int axis2=cp->varindex2->value(); 
   int style2 = cp->y_normalization_style->value();
 
-  // Loop: Find other plot windows that have any of the same axis indices
-  // active and the same normalization style, update the appropriate
+  // Loop: Find other plot windows that have any of the same axis indices 
+  // active and the same normalization style, update the appropriate 
   // translation and scale values for them.
   for( int i=0; i<nplots; i++) {
     Plot_Window *p = pws[i];
 
     // Don't need to update ourself
-    if( p == this) continue;
+    if( p == this) continue; 
 
     // Finally, figure out what me may want to change and how
-    if( p->cp->varindex1->value() == axis1 &&
+    if( p->cp->varindex1->value() == axis1 && 
         p->cp->x_normalization_style->value() == style1) {
-      p->xscale = xscale;
+      p->xscale = xscale; 
       p->xcenter = xcenter;
       p->needs_redraw = 1;
     }
-    else if( p->cp->varindex1->value() == axis2 &&
+    else if( p->cp->varindex1->value() == axis2 && 
              p->cp->x_normalization_style->value() == style2) {
-      p->xscale = yscale;
+      p->xscale = yscale; 
       p->xcenter = ycenter;
       p->needs_redraw = 1;
     }
 
-    if( p->cp->varindex2->value() == axis1 &&
+    if( p->cp->varindex2->value() == axis1 && 
         p->cp->y_normalization_style->value() == style1) {
-      p->yscale = xscale;
+      p->yscale = xscale; 
       p->ycenter = xcenter;
       p->needs_redraw = 1;
     }
-    else if( p->cp->varindex2->value() == axis2 &&
+    else if( p->cp->varindex2->value() == axis2 && 
              p->cp->y_normalization_style->value() == style2) {
-      p->yscale = yscale;
+      p->yscale = yscale; 
       p->ycenter = ycenter;
       p->needs_redraw = 1;
     }
 
-    // This is needed to make sure the scale marks on the axis are
+    // This is needed to make sure the scale marks on the axis are 
     // updated
     p->screen_to_world(-1, -1, p->wmin[0], p->wmin[1]);
     p->screen_to_world(+1, +1, p->wmax[0], p->wmax[1]);
@@ -307,7 +307,7 @@ void Plot_Window::update_linked_transforms()
 // Plot_Window::handle( event) -- Main event handler.
 int Plot_Window::handle( int event)
 {
-  // Current plot window (button pushes, mouse drags, etc) must get redrawn
+  // Current plot window (button pushes, mouse drags, etc) must get redrawn 
   // before others so that selections get colored correctly.  Ugh.
   switch( event) {
     active_plot = index;
@@ -317,7 +317,7 @@ int Plot_Window::handle( int event)
       DEBUG(cout << "FL_PUSH at " << xprev << ", " << yprev << endl);
 
       // Show the control panel associated with this plot window.
-      cpt->value(cps[this->index]);
+      cpt->value(cps[this->index]);  
       xprev = Fl::event_x();
       yprev = Fl::event_y();
 
@@ -328,7 +328,7 @@ int Plot_Window::handle( int event)
       }
 
       // middle button pushed => start zoom
-      if( (Fl::event_state() == FL_BUTTON2) ||
+      if( (Fl::event_state() == FL_BUTTON2) || 
           (Fl::event_state() == (FL_BUTTON1 | FL_CTRL))) {
 
       // XXX wish this worked
@@ -341,13 +341,13 @@ int Plot_Window::handle( int event)
       }
 
       // right button pushed => start translating
-      else if( Fl::event_state(FL_BUTTON3) ||
+      else if( Fl::event_state(FL_BUTTON3) || 
                (Fl::event_state() == (FL_BUTTON1 | FL_ALT)) ) {
         show_center_glyph = 1;
         needs_redraw = 1;
       }
 
-      // left button pushed => start new selection, or start translating
+      // left button pushed => start new selection, or start translating 
       // the old selection
       else if( Fl::event_state() == FL_BUTTON1) {
 
@@ -374,7 +374,7 @@ int Plot_Window::handle( int event)
         xdown = + (2.0*(xdown/(float)w()) -1.0) ; // window -> [-1,1]
         xdown = xdown / xscale;
         xdown = xdown + xcenter;
-
+      
         ydown = (float)yprev;
         ydown = - (2.0*(ydown/(float)h()) -1.0) ; // window -> [-1,1]
         ydown = ydown/yscale;
@@ -401,7 +401,7 @@ int Plot_Window::handle( int event)
       yprev = ycur;
 
       // drag with right mouse (or alt-left-mouse) => translate the view
-      if( Fl::event_state(FL_BUTTON3) ||
+      if( Fl::event_state(FL_BUTTON3) || 
           (Fl::event_state(FL_BUTTON1) && Fl::event_state(FL_ALT))) {
         float xmove = xdragged*(1/xscale)*(2.0/w());
         float ymove = ydragged*(1/yscale)*(2.0/h());
@@ -415,7 +415,7 @@ int Plot_Window::handle( int event)
       }
 
       // drag with middle-mouse (or c-left-mouse) => scale the view
-      else if( Fl::event_state(FL_BUTTON2) ||
+      else if( Fl::event_state(FL_BUTTON2) || 
                (Fl::event_state(FL_BUTTON1) && Fl::event_state(FL_CTRL))) {
         if( scale_histogram) {
           xhscale *= 1 + xdragged*(2.0/w());
@@ -448,18 +448,18 @@ int Plot_Window::handle( int event)
           xtracked = + (2.0*(xcur/(float)w()) -1.0) ; // window -> [-1,1]
           xtracked = xtracked / xscale;
           xtracked = xtracked + xcenter;
-
+        
           ytracked = - (2.0*(ycur/(float)h()) -1.0) ; // window -> [-1,1]
           ytracked = ytracked/yscale;
           ytracked = ytracked + ycenter;
         }
-
+        
         // printf ("FL_DRAG & FL_BUTTON1, event_state: %x  isdrag = %d  xdragged=%f  ydragged=%f\n", Fl::event_state(), isdrag, xdragged, ydragged);
         if( ( fabs(xdragged)+fabs(ydragged))>0) {
           selection_changed = 1;
           if( defer_redraws_button->value()) {
             redraw_one_plot ();
-          }
+          } 
           else {
             handle_selection ();
             redraw_all_plots (index);
@@ -471,7 +471,7 @@ int Plot_Window::handle( int event)
       return 1;
 
     // Mouse button up
-    case FL_RELEASE:
+    case FL_RELEASE:   
       DEBUG (cout << "FL_RELEASE at " << Fl::event_x() << ", " << Fl::event_y() << endl);
       if( show_center_glyph) {
         show_center_glyph = 0;
@@ -485,17 +485,17 @@ int Plot_Window::handle( int event)
       }
       return 1;
 
-    // keypress, key is in Fl::event_key(), ascii in Fl::event_text().  Return
+    // keypress, key is in Fl::event_key(), ascii in Fl::event_text().  Return 
     // 1 if you understand/use the keyboard event, 0 otherwise...
     case FL_KEYDOWN:
       DEBUG ( cout << "FL_KEYDOWN, event_key() = " << Fl::event_key() << endl);
 
-      // XXX should figure out how to share shortcuts between plot windows and
+      // XXX should figure out how to share shortcuts between plot windows and 
       // control panels... later
       switch( Fl::event_key()) {
 
         // exit
-        case 'q':
+        case 'q':  
           if( expert_mode || make_confirmation_window( "Quit?  Are you sure?") > 0)
             exit( 0);
           else
@@ -533,7 +533,7 @@ int Plot_Window::handle( int event)
           scale_histogram=1;
           return 1;
 
-        // run a timing test, for performance tuning & profiling
+        // run a timing test, for performance tuning & profiling 
         case '9':
           run_timing_test();
           return 1;
@@ -542,7 +542,7 @@ int Plot_Window::handle( int event)
         case 'w':
           center_on_click( Fl::event_x(), Fl::event_y());
           return 1;
-
+      
         // Search for strings in x- or y-axis variable
         case 'f':
         {
@@ -587,14 +587,14 @@ int Plot_Window::handle( int event)
           return 0;
       }
 
-    // Shortcut, key is in Fl::event_key(), ascii in Fl::event_text().  Return
+    // Shortcut, key is in Fl::event_key(), ascii in Fl::event_text().  Return 
     // 1 if you understand/use the shortcut event, 0 otherwise...
     case FL_SHORTCUT:
       return 0;
 
     // Mouse wheel, zoom in both the x and y axes
     case FL_MOUSEWHEEL:
-      if(1) {
+      if(1) { 
         float wheel_zoom_rate = 100.0;
         float wheel_size_rate = 5.0;
         float dy = Fl::event_dy();
@@ -622,7 +622,7 @@ int Plot_Window::handle( int event)
     default:
       return Fl_Gl_Window::handle( event);
   }
-}
+} 
 
 //***************************************************************************
 // Plot_Window::reset_selection_box() -- Reset the selection box.
@@ -635,7 +635,7 @@ void Plot_Window::reset_selection_box()
 }
 
 //***************************************************************************
-// Plot_Window::redraw_one_plot() -- Invoke member functions to compute
+// Plot_Window::redraw_one_plot() -- Invoke member functions to compute 
 // histograms and redraw one plot.
 void Plot_Window::redraw_one_plot ()
 {
@@ -650,14 +650,14 @@ void Plot_Window::redraw_one_plot ()
 // Plot_Window::reset_view() -- Reset pan, zoom, and angle.
 void Plot_Window::reset_view()
 {
-  // XXX this, and so much else, needs to be cleaned up, generalized to any
-  // and all axes.  In particular, every possible c-style array should be
+  // XXX this, and so much else, needs to be cleaned up, generalized to any 
+  // and all axes.  In particular, every possible c-style array should be 
   // replaced in viewpoints with a std::vector or a boost::array.
    for (int i=0; i<3; i++) {
      wmin[i] = amin[i];
      wmax[i] = amax[i];
    }
-
+  
   // Get third axis, if any
   int axis2 = (long)(cp->varindex3->mvalue()->user_data());
 
@@ -666,12 +666,12 @@ void Plot_Window::reset_view()
   yscale = 2.0 / (wmax[1]-wmin[1]);
   if (axis2 != nvars) zscale = 2.0 / (wmax[2]-wmin[2]);
   else zscale = 1.0;
-
-  // Initially, datapoints only span 0.8 of the window dimensions, which
+  
+  // Initially, datapoints only span 0.8 of the window dimensions, which 
   // allows room around the edges for labels, tickmarks, histograms....
-  xscale *= initial_pscale;
-  yscale *= initial_pscale;
-  zscale *= initial_pscale;
+  xscale *= initial_pscale; 
+  yscale *= initial_pscale; 
+  zscale *= initial_pscale; 
   initial_scale = (xscale+yscale)/2.0;
   magnification = 1.0;
 
@@ -695,8 +695,8 @@ void Plot_Window::reset_view()
   reset_selection_box ();
   needs_redraw = 1;
 
-  // Make sure the window is visible and resizable.  NOTE: For some reason,
-  // it is necessary to turn this off when a new plot window array is
+  // Make sure the window is visible and resizable.  NOTE: For some reason, 
+  // it is necessary to turn this off when a new plot window array is 
   // created or the windows will not be resizable!
   if( do_reset_view_with_show & !visible()) {
     this->show();
@@ -706,11 +706,11 @@ void Plot_Window::reset_view()
 
 //***************************************************************************
 // Plot_Window::draw() -- Main draw method that calls others.
-void Plot_Window::draw()
+void Plot_Window::draw() 
 {
   DEBUG (cout << "in draw: " << xcenter << " " << ycenter << " " << xscale << " " << yscale << " " << wmin[0] << " " << wmax[0] << endl);
 
-  // the valid() property can avoid reinitializing matrix for
+  // the valid() property can avoid reinitializing matrix for 
   // each redraw:
   if( !valid()) {
     valid(1);
@@ -726,14 +726,14 @@ void Plot_Window::draw()
     // glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     // glEnableClientState(GL_COLOR_ARRAY);
 
-    // this next idiom is necessary, per window, to map texture coordinate
+    // this next idiom is necessary, per window, to map texture coordinate 
     // values to [0..1] for texturing.
     // glMatrixMode(GL_TEXTURE);
-    // glLoadIdentity();
-    // glScalef( 1.0/(float)MAXPLOTS, 1.0/(float)MAXPLOTS, 1.0/(float)MAXPLOTS);
+    // glLoadIdentity();  
+    // glScalef( 1.0/(float)MAXPLOTS, 1.0/(float)MAXPLOTS, 1.0/(float)MAXPLOTS); 
     // glMatrixMode(GL_MODELVIEW);
   }
-
+  
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glTranslatef( xzoomcenter*xscale, yzoomcenter*yscale, zzoomcenter*zscale);
@@ -780,18 +780,18 @@ void Plot_Window::center_on_click( int x, int y)
 {
   float xt;
   float yt;
-
+  
   xt = + (2.0*(x/(float)w()) -1.0) ; // window -> [-1,1]
   xt = xt / xscale;
   xt = xt + xcenter;
-
+  
   yt = - (2.0*(y/(float)h()) -1.0) ; // window -> [-1,1]
   yt = yt/yscale;
   yt = yt + ycenter;
-
+  
   xcenter = xt;
   ycenter = yt;
-
+  
   if(Fl::event_shift()) {
     // zoom in, centered on click
     xscale *= 1.5;
@@ -824,15 +824,15 @@ void Plot_Window::draw_resize_knob()
   gl_font( FL_HELVETICA_BOLD, 11);
   glWindowPos2i( (w()-(int)gl_width(buf1)) - 1, 3);
   gl_draw( (const char *) buf1);
-
+  
   glDisable( GL_COLOR_LOGIC_OP);
 #endif // __APPLE__
 }
 
 //***************************************************************************
-// Plot_Window::draw_background() --  If the background is anything besides
-// black, draw it.  Last.  Why last?  Because we always blend against a
-// black background initially so that the overplotting comes out OK.  Other
+// Plot_Window::draw_background() --  If the background is anything besides 
+// black, draw it.  Last.  Why last?  Because we always blend against a 
+// black background initially so that the overplotting comes out OK.  Other 
 // backgrounds would interfere.
 void Plot_Window::draw_background ()
 {
@@ -863,7 +863,7 @@ void Plot_Window::draw_grid()
     glDisable( GL_DEPTH_TEST);
     glBlendFunc(GL_ONE, GL_ZERO);
     gl_font( FL_HELVETICA_BOLD, 10);
-
+    
     const int nticks = 10;
 
     const double extra=0.05;
@@ -876,9 +876,9 @@ void Plot_Window::draw_grid()
     const double nicemax_x = ceil(max_x/d_x)*d_x,  nicemax_y = ceil(max_y/d_y)*d_y;
     char format_str_x[20], format_str_y[20], temp[40], temp2[40];
 
-    const int nfrac = 8; // number of fractional digits to show.  Was: max(-floor(log10(d)), 0);
+    const int nfrac = 8; // number of fractional digits to show.  Was: max(-floor(log10(d)), 0);	
 //    sprintf(format_str_x, "%%-%d.%dg", nfrac, nfrac);
-    sprintf(format_str_x, "%%.%dg", nfrac);
+    sprintf(format_str_x, "%%.%dg", nfrac);	
     sprintf(format_str_y, "%%.%dg", nfrac);
 
     DEBUG (printf("nicemin_x=%g nicemax_x=%g d_x=%g\n", nicemin_x, nicemax_x, d_x));
@@ -899,7 +899,7 @@ void Plot_Window::draw_grid()
       // lines of constant x, where x is nice
 
       for (double x=nicemin_x+d_x; x<=nicemax_x-0.9999*d_x; x+=d_x) // was: for (x=nicemin; x<nicemax+.5*d; x+=d)
-      {
+      { 
         if (fabsf(x)<0.0001*d_x)
           x=0;
         glBegin( GL_LINES);
@@ -913,11 +913,11 @@ void Plot_Window::draw_grid()
         DEBUG (printf("(%s)\n", temp));
         float wx, wy;
         screen_to_world (0, -1.15, wx, wy); // tweaked offsets
-        gl_draw( temp, x-gl_width(temp)/(w()*xscale), wy);
+        gl_draw( temp, x-gl_width(temp)/(w()*xscale), wy);        
       }
       // lines of constant y, where y is nice
       for (double y=nicemin_y+d_y; y<=nicemax_y-0.9999*d_y; y+=d_y) // was: for (y=nicemin; y<nicemax+.5*d; y+=d)
-      {
+      { 
         if (fabsf(y)<0.0001*d_y)
           y=0;
         glBegin( GL_LINES);
@@ -935,9 +935,9 @@ void Plot_Window::draw_grid()
 }
 
 //***************************************************************************
-// Plot_Window::screen_to_world( xscreen, yscreen, xworld, yworld) -- Convert
+// Plot_Window::screen_to_world( xscreen, yscreen, xworld, yworld) -- Convert 
 // from screen to world co-ordinates?
-void Plot_Window::screen_to_world(
+void Plot_Window::screen_to_world( 
   float xscreen, float yscreen, float &xworld, float &yworld)
 {
   DEBUG (cout << "screen_to_world" << endl
@@ -956,29 +956,29 @@ void Plot_Window::screen_to_world(
 }
 
 //***************************************************************************
-// Plot_Window::interval_to_strings( x1, x2, *buf1, *buf2) -- If this is
+// Plot_Window::interval_to_strings( x1, x2, *buf1, *buf2) -- If this is 
 // ASCII-valued data, convert range values for this interval to strings.
 void Plot_Window::interval_to_strings(
   const int column, const float x1, const float x2, char *buf1, char *buf2)
 {
-  // If this is a numerical axis, write numerical information.  Otherwise
+  // If this is a numerical axis, write numerical information.  Otherwise 
   // identify and write the relevant strings.
   if( Data_File_Manager::column_info[column].hasASCII == 0) {
     sprintf( buf1, "%+.3g", x1);
-    sprintf( buf2, "%+.3g", x2);
+    sprintf( buf2, "%+.3g", x2); 
   }
   else {
     int ixmin = max( -1, (int) (floorf(x1-0.01/(float)npoints)));
     int ixmax = max( -1, (int) (floorf(x2)));
 
-    // If the interval spans at least one integral value, look up and build
+    // If the interval spans at least one integral value, look up and build 
     // string corresponding to each edge.  Otherwise just write the same
     // string twice.
     if( ixmax > ixmin) {
       const char *chrp1 =
-        Data_File_Manager::column_info[column].ascii_value(ixmin+1).c_str();
+        Data_File_Manager::column_info[column].ascii_value(ixmin+1).c_str(); 
       const char *chrp2 =
-        Data_File_Manager::column_info[column].ascii_value(ixmax).c_str();
+        Data_File_Manager::column_info[column].ascii_value(ixmax).c_str(); 
       sprintf( buf1, "%11s", chrp1);
       sprintf( buf2, "%-11s", chrp2);
     }
@@ -998,9 +998,9 @@ void Plot_Window::draw_axes()
     glPushMatrix();
     glLoadIdentity();
 
-    // Define the extra (relative) distance that axes extend past leftmost
+    // Define the extra (relative) distance that axes extend past leftmost 
     // and rightmost tickmarks and set initial pscale
-    float a = 0.1;
+    float a = 0.1; 
     float c = initial_pscale;
     glScalef( c, c, c);
 
@@ -1009,23 +1009,23 @@ void Plot_Window::draw_axes()
     if( cp->Bkg->value() <= 0.4)
       glColor4f( 0.7,0.7,0.0,0.0);
     else
-      glColor4f(
-        0.4*cp->Bkg->value(),
-        0.4*cp->Bkg->value(),
+      glColor4f( 
+        0.4*cp->Bkg->value(), 
+        0.4*cp->Bkg->value(), 
         0.0*cp->Bkg->value(), 0.0);
 
     if (cp->show_axes->value()) {
       // Draw the axes
       glBegin( GL_LINES);
-
+      
       // X data
       glVertex3f( -(1+a), -(1+a), -(1+a));
       glVertex3f( +(1+a), -(1+a), -(1+a));
-
+      
       // Y data
       glVertex3f( -(1+a), -(1+a), -(1+a));
       glVertex3f (-(1+a), +(1+a), -(1+a));
-
+      
       // Z axis
       glVertex3f( -(1+a), -(1+a), -(1+a));
       glVertex3f( -(1+a), -(1+a), +(1+a));
@@ -1034,59 +1034,59 @@ void Plot_Window::draw_axes()
 
       // Draw axes labels.  Scope is restricted so we can reuse 'b'?
       {
-        // offset for axis labels values. b<1 -> inwards,
+        // offset for axis labels values. b<1 -> inwards, 
         // b>1 -> outwards, b==1 -> on axis.
-        float b = 2;
-
+        float b = 2; 
+        
         gl_font( FL_HELVETICA_BOLD, 11);
         float wid = gl_width(xlabel.c_str())/(float)(w());
-        gl_draw( (const char *)(xlabel.c_str()), -wid, -(1+b*a));
-
+        gl_draw( (const char *)(xlabel.c_str()), -wid, -(1+b*a));  
+        
         b = 1.5;
         gl_draw( (const char *)(ylabel.c_str()), -(1+b*a), 1+b*a);
       }
-
+      
       // the offset factor for tic mark length:
       // b<1 -> inwards, b>1 -> outwards, b==1 -> no tick.
       float b = 1.5;
 
-      // If requested, draw tic marks and numbers to show scale
+      // If requested, draw tic marks and numbers to show scale  
       if( cp->show_scale->value()) {
 
         glBegin( GL_LINES);
 
         // lower X-axis tick
-        glVertex3f( -1, -(1+a), -(1+a));
+        glVertex3f( -1, -(1+a), -(1+a)); 
         glVertex3f( -1, -(1+b*a), -(1+a));
 
         // upper X-axis tick
-        glVertex3f( +1, -(1+a), -(1+a));
+        glVertex3f( +1, -(1+a), -(1+a)); 
         glVertex3f( +1, -(1+b*a), -(1+a));
 
         // lower Y-axis tick
-        glVertex3f( -(1+a), -1, -(1+a));
-        glVertex3f( -(1+b*a), -1, -(1+a));
+        glVertex3f( -(1+a), -1, -(1+a)); 
+        glVertex3f( -(1+b*a), -1, -(1+a)); 
 
         // upper Y-axis tick
-        glVertex3f( -(1+a), +1, -(1+a));
-        glVertex3f( -(1+b*a), +1, -(1+a));
+        glVertex3f( -(1+a), +1, -(1+a)); 
+        glVertex3f( -(1+b*a), +1, -(1+a)); 
 
         // XXX Z-axis ticks clutter 2D plots
-        b = 1;
+        b = 1; 
 
         // lower Z-axis tick
-        glVertex3f( -(1+a), -(1+a), -1);
+        glVertex3f( -(1+a), -(1+a), -1); 
         glVertex3f( -(1+b*a), -(1+a), -1);
 
         // upper Z-axis tick
-        glVertex3f (-(1+a), -(1+a), +1);
-        glVertex3f (-(1+b*a), -(1+a), +1);
+        glVertex3f (-(1+a), -(1+a), +1); 
+        glVertex3f (-(1+b*a), -(1+a), +1); 
 
         glEnd();
 
-        // Offset for drawing tick marks' numerical values.  Positions are controlled by "b"
+        // Offset for drawing tick marks' numerical values.  Positions are controlled by "b" 
         // as follows:
-        //  b<1  -> draw it inside of the axis,
+        //  b<1  -> draw it inside of the axis, 
         //  b>1  -> draw it outside of the axis,
         //  b==1 -> draw it on the axis.
         b = 2;
@@ -1113,7 +1113,7 @@ void Plot_Window::draw_axes()
 }
 
 //***************************************************************************
-// Plot_Window::draw_center_glyph() -- Draw a glyph in the center of the
+// Plot_Window::draw_center_glyph() -- Draw a glyph in the center of the 
 // window, as an aid for positioning in preparation to zooming.
 void Plot_Window::draw_center_glyph()
 {
@@ -1122,7 +1122,7 @@ void Plot_Window::draw_center_glyph()
   glDisable( GL_DEPTH_TEST);
   glEnable( GL_COLOR_LOGIC_OP);
   glLogicOp( GL_INVERT);
-
+  
   glPushMatrix ();
   glLoadIdentity();
   glBlendFunc( GL_ONE, GL_ZERO);
@@ -1130,10 +1130,10 @@ void Plot_Window::draw_center_glyph()
 
   glColor4f(0.7,0.7,0.7,0.0);
 
-  glVertex3f( -0.025, 0.0, 0.0);
+  glVertex3f( -0.025, 0.0, 0.0); 
   glVertex3f( 0.025, 0.0, 0.0);
 
-  glVertex3f( 0.0, -0.025, 0.0);
+  glVertex3f( 0.0, -0.025, 0.0); 
   glVertex3f( 0.0, 0.025, 0.0);
 
   glEnd();
@@ -1142,8 +1142,8 @@ void Plot_Window::draw_center_glyph()
 }
 
 //***************************************************************************
-// Plot_Window::print_selection_stats() -- dynamically write statistics for
-// the totality of the selection(s) as well as the numeric values of bounding
+// Plot_Window::print_selection_stats() -- dynamically write statistics for 
+// the totality of the selection(s) as well as the numeric values of bounding 
 // box edges to the current plot window while brushing.
 void Plot_Window::print_selection_stats ()
 {
@@ -1173,27 +1173,27 @@ void Plot_Window::print_selection_stats ()
   interval_to_strings(cp->varindex1->value(), xmin, xmax, buf1, buf2);
   gl_draw( (const char *) buf1, xmin-2.25*gl_width(buf1)/(w()*xscale), ((ydown+ytracked)/2)-(0.5f*gl_height())/(h()*yscale));
   gl_draw( (const char *) buf2, xmax+4.0f/(w()*xscale), ((ydown+ytracked)/2)-(0.5f*gl_height())/(h()*yscale) );
-
+  
   // then the top and bottom
   float ymin = min(ydown,ytracked);
   float ymax = max(ydown,ytracked);
   interval_to_strings(cp->varindex2->value(), ymin, ymax, buf1, buf2);
   gl_draw( (const char *) buf1, (xmin+xmax)/2-gl_width(buf1)/(w()*xscale), ymin-(2.0f*gl_height())/(h()*yscale) );
   gl_draw( (const char *) buf2, (xmin+xmax)/2-gl_width(buf2)/(w()*xscale), ymax+(0.5f*gl_height())/(h()*yscale) );
-
+  
   glDisable( GL_COLOR_LOGIC_OP);
 }
 
 //***************************************************************************
 // Plot_Window::handle_selection() -- Handler to handle mouse-based selection
-// operations.  This routine, and anything it calls, can't actually draw
-// anything (since openGL functions cannot be called from within an fltk
-// handle() method).  Selection information (e.g. bounding box, statistics)
-// are drawn via the draw() method for the window making the selection by
+// operations.  This routine, and anything it calls, can't actually draw 
+// anything (since openGL functions cannot be called from within an fltk 
+// handle() method).  Selection information (e.g. bounding box, statistics) 
+// are drawn via the draw() method for the window making the selection by 
 // calling draw_selection_information().
 void Plot_Window::handle_selection ()
 {
-  blitz::Range NPTS( 0, npoints-1);
+  blitz::Range NPTS( 0, npoints-1);  
 
   if (xdown==xtracked && ydown==ytracked) return;
 
@@ -1211,9 +1211,9 @@ void Plot_Window::handle_selection ()
   switch (xxx) {
   case BRUSH_BOX:
     inside_footprint(NPTS) =
-      where( ( vertices( NPTS, 0)>fmaxf( xdown, xtracked) ||
+      where( ( vertices( NPTS, 0)>fmaxf( xdown, xtracked) || 
                vertices( NPTS, 0)<fminf( xdown, xtracked) ||
-               vertices( NPTS, 1)>fmaxf( ydown, ytracked) ||
+               vertices( NPTS, 1)>fmaxf( ydown, ytracked) || 
                vertices( NPTS, 1)<fminf( ydown, ytracked)),
              0, 1);
     break;
@@ -1233,10 +1233,10 @@ void Plot_Window::handle_selection ()
 }
 
 //***************************************************************************
-// Plot_Window::update_selection_from_footprint() --
+// Plot_Window::update_selection_from_footprint() -- 
 void Plot_Window::update_selection_from_footprint()
 {
-  blitz::Range NPTS( 0, npoints-1);
+  blitz::Range NPTS( 0, npoints-1);  
 
   Brush  *current_brush = (Brush *)NULL;
   current_brush =  dynamic_cast <Brush*> (brushes_tab->value());
@@ -1252,27 +1252,27 @@ void Plot_Window::update_selection_from_footprint()
   // they'll get sorted correctly and drawn with the correct color and texture.
   Brush *bp = dynamic_cast <Brush*> (brushes_tab->value());
   assert (bp);
-  int brush_index = bp->index;
+  int brush_index = bp->index; 
   if (mask_out_deselected->value() && brush_index>0) {
     // MCL this should be called "and with selection" or some such.
     selected( NPTS) = where( newly_selected( NPTS) && selected(NPTS), brush_index, previously_selected( NPTS));
-  }
+  } 
   else if (mask_out_deselected->value() && brush_index==0) {
     // MCL XXX this is a bogus hack to implement an "inverse" brush that deselects everything outside of it,
     // and leaves unchanged whatever is inside it.  Invoke using brush zero while "mask_out_deselected" is turned on.
     selected( NPTS) = where( !newly_selected( NPTS), brush_index, previously_selected( NPTS));
-  }
+  } 
   else {
     selected( NPTS) = where( newly_selected( NPTS), brush_index, previously_selected( NPTS));
   }
-
+  
   // pack (gather) the new index arrays for later rendering
   color_array_from_selection ();
 }
 
 //***************************************************************************
-// Plot_Window::color_array_from_selection() -- Fill the index arrays and
-// their associated counts.  Each array of indices will be rendered later
+// Plot_Window::color_array_from_selection() -- Fill the index arrays and 
+// their associated counts.  Each array of indices will be rendered later 
 // using the properties of its corresponding brush.
 void Plot_Window::color_array_from_selection()
 {
@@ -1295,7 +1295,7 @@ void Plot_Window::color_array_from_selection()
 }
 
 //***************************************************************************
-// Plot_Window::draw_selection_information() -- Draw decorations for the
+// Plot_Window::draw_selection_information() -- Draw decorations for the 
 // selected set in the window where the user is making the selection.
 void Plot_Window::draw_selection_information()
 {
@@ -1314,7 +1314,7 @@ void Plot_Window::draw_selection_information()
     glEnd();
   }
 
-  // Print selection statistics.  Should there should be a gui
+  // Print selection statistics.  Should there should be a gui 
   // element controlling this?
   print_selection_stats();
 
@@ -1350,15 +1350,15 @@ void Plot_Window::draw_data_points()
     // bind VBO for vertex data
     glBindBuffer(GL_ARRAY_BUFFER, index+1);
 
-    // If the variables we are plotting were changed, then the vertex VBO must
-    // be updated to contain the correct vertex data, and it has to be done
+    // If the variables we are plotting were changed, then the vertex VBO must 
+    // be updated to contain the correct vertex data, and it has to be done 
     // here, where the correct window and context are active.
     if (!VBOfilled) fill_VBO();
 
     glVertexPointer (3, GL_FLOAT, 0, BUFFER_OFFSET(0));
   }
   else {
-    glVertexPointer (3, GL_FLOAT, 0, (GLfloat *)vertices.data());
+    glVertexPointer (3, GL_FLOAT, 0, (GLfloat *)vertices.data()); 
   }
 
   // set the blending mode for this plot
@@ -1367,32 +1367,32 @@ void Plot_Window::draw_data_points()
     case Control_Panel_Window::BLEND_OVERPLOT:
       glBlendFunc(GL_ONE, GL_ZERO);
       break;
-
+    
     case Control_Panel_Window::BLEND_OVERPLOT_WITH_ALPHA:
       glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,GL_SRC_ALPHA,GL_ONE_MINUS_DST_COLOR);
       break;
-
+    
     case Control_Panel_Window::BLEND_BRUSHES_SEPARATELY:
       glEnable(GL_STENCIL_TEST);
       clear_stencil_buffer();
       clear_alpha_planes();
       glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
-      break;
-
+      break; 
+    
     case Control_Panel_Window::BLEND_ALL_BRUSHES:
       glBlendFunc(GL_SRC_ALPHA, GL_ONE);	// very good when compositing on black bkg w/ALPHA_TEXTURE #defined
       break;
-
+    
 #if 0
     case Control_Panel_Window::BLEND_ALL2:
       glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA); // old default, use with ALPHA_TEXTURE #undefined
       break;
-
+    
     case Control_Panel_Window::BLEND_ALL3:
       // next is almost right for bending against light backgrounds with ALPHA_TEXTURE #defined
       // and it is OK (but not as good as the above with ALPHA_TEXTURE #undefined) for black backgrounds.
       // needs glAlphaFunc(GL_GREATER, 0.5);
-      glBlendFuncSeparate(GL_SRC_COLOR, GL_DST_ALPHA, GL_SRC_ALPHA, GL_ONE);
+      glBlendFuncSeparate(GL_SRC_COLOR, GL_DST_ALPHA, GL_SRC_ALPHA, GL_ONE);  
       break;
 #endif
 
@@ -1409,7 +1409,7 @@ void Plot_Window::draw_data_points()
     first_brush=NBRUSHES-1; brush_step=-1;
   }
 
-  // Loop: Draw successive brished in reverse order
+  // Loop: Draw successive brished in reverse order    
   for( int brush_num=0, brush_index=first_brush; brush_num<NBRUSHES; brush_num++, brush_index+=brush_step) {
 
     // don't draw nonselected points (brush[0]) if we are hiding nonselected points in this plot
@@ -1419,7 +1419,7 @@ void Plot_Window::draw_data_points()
 
     Brush *brush = brushes[brush_index];
     unsigned int count = brush->count;
-
+    
     // If some points were selected in this set, render them
     if(count > 0) {
 
@@ -1440,7 +1440,7 @@ void Plot_Window::draw_data_points()
       // alpa cutoff, useful for soft brushes on light backgrounds.  This should perhaps
       // be per plot instead of per brush, or better yet it should go away.
       glAlphaFunc(GL_GREATER, brush->cutoff->value());
-
+      
       // set the current brush to render points, point_sprites or line strips.
       current_sprite = brush->symbol_menu->value();
       assert ((current_sprite >= 0) && (current_sprite < NSYMBOLS));
@@ -1477,9 +1477,9 @@ void Plot_Window::draw_data_points()
       // then render the points
       if (use_VBOs) {
         assert (VBOinitialized && VBOfilled && indexVBOsinitialized && indexVBOsfilled) ;
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+1+brush_index);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, MAXPLOTS+1+brush_index); 
         glDrawElements( element_mode, (GLsizei)count, GL_UNSIGNED_INT, BUFFER_OFFSET(0)); // would it bee faster to use glDrawRangeElements() ?
-        // make sure we succeeded
+        // make sure we succeeded 
         CHECK_GL_ERROR("drawing points from VBO");
       }
       else {
@@ -1490,7 +1490,7 @@ void Plot_Window::draw_data_points()
       }
     }
   }
-
+  
   // potentially turn off various gl state variables that are specific to this routine.
   if (z_bufferring_enabled) {
     glDisable( GL_DEPTH_TEST);
@@ -1509,20 +1509,20 @@ void Plot_Window::draw_data_points()
 }
 
 //***************************************************************************
-// Plot_Window::compute_histogram( axis) -- If requested, compute equi-width
+// Plot_Window::compute_histogram( axis) -- If requested, compute equi-width 
 // histogram for axis 'axis'.
 //
-// MCL XXX this should be split into two routines, one for computing the
-// histogram for all the points, the other for selected points, and _neither_
-// of them needs to be called as often as they are.  The first only needs to
-// be called in extract_and_redraw(), and the second only when the selection
-// changes (but it must be called for all plots in that case), or when {x,y}bins
-// changes (in that case, only for one plot).  The way it is, a lot of extra
+// MCL XXX this should be split into two routines, one for computing the 
+// histogram for all the points, the other for selected points, and _neither_ 
+// of them needs to be called as often as they are.  The first only needs to 
+// be called in extract_and_redraw(), and the second only when the selection 
+// changes (but it must be called for all plots in that case), or when {x,y}bins 
+// changes (in that case, only for one plot).  The way it is, a lot of extra 
 // time is burned here if any histograms are being shown.
 // Note - we could experiment with openGL histograms...but they seem to suck.
 //
-// MCL XXX also note that if we want to get rid of the vertices() instance
-// variable to save memory, which should be doable since vertices are copied
+// MCL XXX also note that if we want to get rid of the vertices() instance 
+// variable to save memory, which should be doable since vertices are copied 
 // into VBOs, then we will have to do something else here.
 void Plot_Window::compute_histogram( int axis)
 {
@@ -1543,12 +1543,12 @@ void Plot_Window::compute_histogram( int axis)
 
   counts_selected( BINS, axis) = 0.0;
   // range is tweaked by (n+1)/n to get the "last" point into the correct bin.
-  float range = (amax[axis] - amin[axis]) * ((float)(npoints+1)/(float)npoints);
+  float range = (amax[axis] - amin[axis]) * ((float)(npoints+1)/(float)npoints); 
 
   // only count points that are being selected by the most recent brush
   Brush *bp = dynamic_cast <Brush*> (brushes_tab->value());
   assert (bp);
-  int brush_index = bp->index;
+  int brush_index = bp->index; 
 
   // Loop: sum over successive points to load histogram arrays
   for( int i=0; i<npoints; i++) {
@@ -1562,8 +1562,8 @@ void Plot_Window::compute_histogram( int axis)
     if( selected( i) == brush_index) counts_selected( bin, axis)+=weight;
   }
   float maxcount = max(max(counts(BINS,axis)), 1.0f);
-
-  // Normalize results.
+  
+  // Normalize results.  
   if( npoints > 0) {
     counts(BINS,axis) = counts(BINS,axis) / (float)maxcount;
     counts_selected(BINS,axis) = counts_selected(BINS,axis) / (float)maxcount;
@@ -1591,7 +1591,7 @@ void Plot_Window::draw_x_histogram(
     glVertex2f( x, 0.0); // lower left corner
     glVertex2f( x, bin_counts( bin, 0));   // left edge
     glVertex2f( x+xwidth, bin_counts( bin, 0));   // top edge
-    glVertex2f( x+xwidth,0.0);   // right edge
+    glVertex2f( x+xwidth,0.0);   // right edge 
   }
   glEnd();
 }
@@ -1605,10 +1605,10 @@ void Plot_Window::draw_y_histogram(
   float ywidth = (amax[1]-amin[1]) / (float)(nbins);
   glBegin( GL_LINE_STRIP);
   for( int bin=0; bin<nbins; bin++) {
-    glVertex2f( 0.0, y);
+    glVertex2f( 0.0, y);          
     glVertex2f(bin_counts(bin),y);   // bottom
     glVertex2f(bin_counts(bin), y+ywidth);   // right edge
-    glVertex2f(0.0, y+ywidth);   // top edge
+    glVertex2f(0.0, y+ywidth);   // top edge 
     y+=ywidth;
   }
   glEnd();
@@ -1641,7 +1641,7 @@ void Plot_Window::draw_histograms()
     return;
 
   // histograms base is this far from edge of window
-  float hoffset = 0.1;
+  float hoffset = 0.1; 
 
   glPushMatrix();
   // histograms should cover pointclouds
@@ -1656,7 +1656,7 @@ void Plot_Window::draw_histograms()
     glTranslatef( -xcenter, -1.0/(yhscale*cp->hscale_slider[0]->value()), 0.0);
     glTranslatef( -xzoomcenter, 0.0, 0);
     glTranslatef (0.0, 0.0, hoffset);
-
+    
     // Draw x-axis histogram of all points.
     if (x_marginal) {
       glColor4f( 0.0, 0.5, 0.5, 1.0);
@@ -1711,20 +1711,20 @@ void Plot_Window::draw_histograms()
 }
 
 //***************************************************************************
-// Plot_Window::density_1D( a, axis) -- Compute marginal density estimate
+// Plot_Window::density_1D( a, axis) -- Compute marginal density estimate 
 // along axis using equi-width histogram.  Input array a is over-written.
 void Plot_Window::density_1D( blitz::Array<float,1> a, const int axis)
 {
-  // need to compute (but not necessarily display) the x-axis histogram if
+  // need to compute (but not necessarily display) the x-axis histogram if 
   // its not already there.
   if (!cp->show_histogram[axis]->value()) compute_histogram(axis);
   int nbins = (int)(exp2(cp->nbins_slider[axis]->value()));
 
-  // Loop: For each point, find which bin its in (since that isn't saved in
-  // compute_histogram) and set the density estimate for the point
+  // Loop: For each point, find which bin its in (since that isn't saved in 
+  // compute_histogram) and set the density estimate for the point 
   // equal to the bin count
   // range is tweaked by (n+1)/n to get the "last" point into the correct bin.
-  float range = (amax[axis] - amin[axis]) * ((float)(npoints+1)/(float)npoints);
+  float range = (amax[axis] - amin[axis]) * ((float)(npoints+1)/(float)npoints); 
   for( int i=0; i<npoints; i++) {
     int bin = (int)(floorf( nbins * ( ( vertices(i,axis) - amin[axis]) / range)));
     if( bin < 0) bin = 0;
@@ -1734,7 +1734,7 @@ void Plot_Window::density_1D( blitz::Array<float,1> a, const int axis)
 }
 
 //***************************************************************************
-// Plot_Window::transform_2d() -- If requested, transform data to 2D
+// Plot_Window::transform_2d() -- If requested, transform data to 2D 
 // sum-vs-difference or polar coordinates.
 int Plot_Window::transform_2d()
 {
@@ -1774,8 +1774,8 @@ int Plot_Window::transform_2d()
 // Plot_Window::normalize( a, a_rank0, style, axis_index) --  Apply
 // normalization of the requested style.
 int Plot_Window::normalize(
-  blitz::Array<float,1> a,
-  blitz::Array<int,1> a_rank0,
+  blitz::Array<float,1> a, 
+  blitz::Array<int,1> a_rank0, 
   int style, int axis_index)
 {
   blitz::Range NPTS(0,npoints-1);
@@ -1798,7 +1798,7 @@ int Plot_Window::normalize(
 #endif // CHECK_FOR_NANS_IN_NORMALIZATION
 
   float mu,sigma,partial_rank;
-
+  
   switch( style) {
   case Control_Panel_Window::NORMALIZATION_NONE:
     amin[axis_index] = -1;
@@ -1811,13 +1811,13 @@ int Plot_Window::normalize(
     return 1;
 
   // All positive data fits in window, zero at "left" of axis.
-  case Control_Panel_Window::NORMALIZATION_ZEROMAX:
+  case Control_Panel_Window::NORMALIZATION_ZEROMAX: 
     amin[axis_index] = 0.0;
     amax[axis_index] = tmax[axis_index];
     return 1;
 
   // All data fits in window w/zero at center of axis
-  case Control_Panel_Window::NORMALIZATION_MAXABS:
+  case Control_Panel_Window::NORMALIZATION_MAXABS:  
   {
     float tmaxabs = fmaxf(fabsf(tmin[axis_index]),fabsf(tmax[axis_index]));
     if( tmaxabs != 0.0) {
@@ -1847,7 +1847,7 @@ int Plot_Window::normalize(
 
   // Mean at center of axis, axis extends to +/- 3*sigma
   // MCL XXX behaves incorrectly with axis offsets
-  case Control_Panel_Window::NORMALIZATION_THREESIGMA:
+  case Control_Panel_Window::NORMALIZATION_THREESIGMA:  
     mu = mean(a(NPTS));
     sigma = sqrt((1.0/(float)npoints)*sum(pow2(a(NPTS)-mu)));
     DEBUG (cout << "mu, sigma = " << mu << ", " << sigma << endl);
@@ -1858,11 +1858,11 @@ int Plot_Window::normalize(
     return 1;
 
   // Log of negative numbers get assigned a value of zero.
-  case Control_Panel_Window::NORMALIZATION_LOG10:
+  case Control_Panel_Window::NORMALIZATION_LOG10: 
     if( tmin[axis_index] <= 0.0) {
       cerr << "Warning: "
            << "attempted to take logarithms of nonpositive "
-           << " numbers. Their logs were set to zero."
+           << " numbers. Their logs were set to zero." 
            << endl;
     }
     a(NPTS) = where( a(NPTS) > 0, log10(a(NPTS)), 0);
@@ -1871,7 +1871,7 @@ int Plot_Window::normalize(
     return 1;
 
   // Simple sigmoid, (-inf,0,+inf) -> (-1,0,+1)
-  case Control_Panel_Window::NORMALIZATION_SQUASH:
+  case Control_Panel_Window::NORMALIZATION_SQUASH: 
     a(NPTS) = a(NPTS)/(1+abs(a(NPTS)));
     amin[axis_index] = a(a_rank(0));
     amax[axis_index] = a(a_rank(npoints-1));
@@ -1886,14 +1886,14 @@ int Plot_Window::normalize(
     amin[axis_index] = 1.0;
     amax[axis_index] = (float)(npoints);
     return 1;
-
+      
   // Replace each value with its rank, equal values get equal rank
   case Control_Panel_Window::NORMALIZATION_PARTIAL_RANK:
   {
     partial_rank = 1.0;
-    float previous = a(a_rank(0));
+    float previous = a(a_rank(0)); 
 
-    // Loop: Subsequent values, if equal, get equal rank.  Otherwise, they
+    // Loop: Subsequent values, if equal, get equal rank.  Otherwise, they 
     // get previous + 1.
     for( int i=0; i<npoints; i++) {
       if ( a(a_rank(i)) > previous ) {
@@ -1906,9 +1906,9 @@ int Plot_Window::normalize(
     amax[axis_index] = partial_rank;
     return 1;
   }
-
+      
   // Gaussianize the data, mapping the old median to 0 in the new Gaussian N(0,1).
-  case Control_Panel_Window::NORMALIZATION_GAUSSIANIZE:
+  case Control_Panel_Window::NORMALIZATION_GAUSSIANIZE: 
     for( int i=0; i<npoints; i++) {
       a(a_rank(i)) = (1.0/5.0) * (float)gsl_cdf_ugaussian_Pinv((double)(float(i+1) / (float)(npoints+2)));
     }
@@ -1917,13 +1917,13 @@ int Plot_Window::normalize(
     return 1;
 
   // randomize the data - randomly shuffle the points.
-  case Control_Panel_Window::NORMALIZATION_RANDOMIZE:
+  case Control_Panel_Window::NORMALIZATION_RANDOMIZE: 
   {
     // this is crufty because gsl doesn't know about 1D arrays with non-unit strides.
     blitz::Array<float,1> acopy = a;
 
-    // initialize the temporary indices to be sequential.
-    blitz::firstIndex ident;
+    // initialize the temporary indices to be sequential.  
+    blitz::firstIndex ident;   
     blitz::Array<int,1> tmp_indices(npoints);
     tmp_indices = ident;
 
@@ -1942,13 +1942,13 @@ int Plot_Window::normalize(
 }
 
 //***************************************************************************
-// Plot_Window::compute_rank( var_index) -- Order data for normalization and
+// Plot_Window::compute_rank( var_index) -- Order data for normalization and 
 // for the generation of histograms
 void Plot_Window::compute_rank( int var_index)
 {
   // If we have a rank "cache hit", return, otherwise order data, etc.
   if( Data_File_Manager::column_info[var_index].isRanked) {
-    return;
+    return; 
   }
   else {
     blitz::Range NPTS(0,npoints-1);
@@ -1956,15 +1956,15 @@ void Plot_Window::compute_rank( int var_index)
     // The blitz copy constructor aliases the RHS,
     // So this next statement just creates a new view of the rhs.
     blitz::Array<int,1> a_ranked_indices =
-      (Data_File_Manager::column_info[var_index]).ranked_points(NPTS);
-
+      (Data_File_Manager::column_info[var_index]).ranked_points(NPTS); 
+    
     // initialialize the ranked indices to be sequential.  The sort that
     // follows will permute them into the correct order.
     blitz::firstIndex ident;    // MCL XXX don't we have a global holding this?
     a_ranked_indices = ident;
 
-    // the sort method myCompare() needs a global alias (tmp_points) to the
-    // array data holding the sort key.  We can't use the copy contructor
+    // the sort method myCompare() needs a global alias (tmp_points) to the 
+    // array data holding the sort key.  We can't use the copy contructor 
     // here since tmp_points was constructed in pre-main.
     // Lucky for us, blitz provides the reference() method for this purpose.
     tmp_points.reference(
@@ -1982,8 +1982,8 @@ void Plot_Window::compute_rank( int var_index)
 }
 
 //***************************************************************************
-// Plot_Window::extract_data_points() -- Extract column labels and data for a
-// set of axes, rank (order) and normalize and scale data, compute histograms,
+// Plot_Window::extract_data_points() -- Extract column labels and data for a 
+// set of axes, rank (order) and normalize and scale data, compute histograms, 
 // and compute axes scales.
 //
 // MCL XXX this routine (and others) could be refactored to loop over the axes
@@ -2015,21 +2015,21 @@ int Plot_Window::extract_data_points ()
   // ylabel = Data_File_Manager::column_info[ axis1].label;
   // if( axis2 != nvars) zlabel = Data_File_Manager::column_info[ axis2].label;
   // else zlabel = "";
-
+  
   // Define a Range operator with which to extract subarrays
   blitz::Range NPTS( 0, npoints-1);
 
-  // Order data to prepare for normalization and scaling and
+  // Order data to prepare for normalization and scaling and 
   // report progress
   if (be_verbose) {
-    cout << "Plot_Window::extract_data_points: plot[ "
+    cout << "Plot_Window::extract_data_points: plot[ " 
          << row << ", " << column << "]" <<endl;
     cout << " pre-normalization: " << endl;
   }
-
+  
   // Rank points by x-axis value
   compute_rank(axis0);
-  x_rank.reference(
+  x_rank.reference( 
     Data_File_Manager::column_info[axis0].ranked_points(NPTS));
   tmin[0] =
     Data_File_Manager::column_info[axis0].points(x_rank( 0));
@@ -2078,26 +2078,26 @@ int Plot_Window::extract_data_points ()
   }
   if (be_verbose) cout << endl;
 
-  // OpenGL vertices, vertex arrays, and VBOs need to have their x, y, and z
-  // coordinates interleaved -- i.e. stored in adjacent memory locations:
-  // x[0],y[0],z[0],x[1],y[1],z[1],...  Unfortunately, this is not how the
-  // raw data are stored in the blitz points() array.  For this reason, we
-  // must copy the appropriate data "columns" from the points() array into
+  // OpenGL vertices, vertex arrays, and VBOs need to have their x, y, and z 
+  // coordinates interleaved -- i.e. stored in adjacent memory locations:  
+  // x[0],y[0],z[0],x[1],y[1],z[1],...  Unfortunately, this is not how the 
+  // raw data are stored in the blitz points() array.  For this reason, we 
+  // must copy the appropriate data "columns" from the points() array into 
   // the appropriate components of the vertex() array.
   //
   // Though this copying takes up time and memory, it is OK since we will
-  // almost certainly want to normalize and/or transform the vertices prior
-  // rendering them.  Since we don't want to transform and/or normalize
-  // (i.e. clobber) the "original" data, we transform and/or normalize
-  // using aliases to the vertex data.  Since the vertex data are copies
-  // (not aliases) of the original uncorrupted points() data, this works
+  // almost certainly want to normalize and/or transform the vertices prior 
+  // rendering them.  Since we don't want to transform and/or normalize 
+  // (i.e. clobber) the "original" data, we transform and/or normalize 
+  // using aliases to the vertex data.  Since the vertex data are copies 
+  // (not aliases) of the original uncorrupted points() data, this works 
   // out fine.
 
-  // MCL XXX - there is no need to copy and normalize all axes if only one
+  // MCL XXX - there is no need to copy and normalize all axes if only one 
   // has changed... Oh, well...
 
-  // copy (via assignment) the appropriate columns of points() data to
-  // corresponding components of vertex() array, with circular offset(s), if
+  // copy (via assignment) the appropriate columns of points() data to 
+  // corresponding components of vertex() array, with circular offset(s), if 
   // requested (experimental).
   // MCL XXX need to do away with axis0, axis1, and axis2 & replace with axis_index[].
   // First copy the x-axis
@@ -2126,13 +2126,13 @@ int Plot_Window::extract_data_points ()
     // MCL XXX offset not supported for z axis (yet).
     vertices( NPTS, 2) = Data_File_Manager::column_info[ axis2].points( NPTS);
   }
-
+  
   // create aliases to newly copied vertex data for normalization & transformation.
-  blitz::Array<float,1> xpoints = vertices( NPTS, 0);
+  blitz::Array<float,1> xpoints = vertices( NPTS, 0); 
   blitz::Array<float,1> ypoints = vertices( NPTS, 1);
   blitz::Array<float,1> zpoints = vertices( NPTS, 2);
 
-  // Apply the normalize() method to normalize and scale the plot's data
+  // Apply the normalize() method to normalize and scale the plot's data 
   (void) normalize( xpoints, x_rank, cp->x_normalization_style->value(), 0);
   (void) normalize( ypoints, y_rank, cp->y_normalization_style->value(), 1);
   if( axis2 != nvars) {
@@ -2142,8 +2142,8 @@ int Plot_Window::extract_data_points ()
     amax[2] = +1.0;
   }
 
-  // VBO will have to be updated to hold the new vertices in draw_data_points(),
-  // so we set a flag.  We can't update the VBO now, since we can't call openGL
+  // VBO will have to be updated to hold the new vertices in draw_data_points(), 
+  // so we set a flag.  We can't update the VBO now, since we can't call openGL 
   // functions from within an fltk callback.
   VBOfilled = false;
 
@@ -2163,9 +2163,9 @@ int Plot_Window::extract_data_points ()
 // Define STATIC methods
 
 //***************************************************************************
-// Plot_Window::upper_triangle_incr( i, j, n) -- STATIC method to increment
-// the row and column indices, (i,j), to traverse an upper triangular matrix
-// by moving "down and to the right" with wrapping.  A static method used by
+// Plot_Window::upper_triangle_incr( i, j, n) -- STATIC method to increment 
+// the row and column indices, (i,j), to traverse an upper triangular matrix 
+// by moving "down and to the right" with wrapping.  A static method used by 
 // Plot_Window::change_axes and in the body of the main routine to pick
 // new axis automatically (and stupidly) e.g. when the "change axes" button is pressed.
 void Plot_Window::upper_triangle_incr( int &i, int &j, const int n)
@@ -2199,18 +2199,18 @@ void Plot_Window::upper_triangle_incr( int &i, int &j, const int n)
 }
 
 //***************************************************************************
-// Plot_Window::redraw_all_plots( p) -- STATIC method that invokes methods to
-// redraw all plots cylically, starting with plot p.  This is a static method
-// used by class Plot_Window and by the npoints_changed method in the main
+// Plot_Window::redraw_all_plots( p) -- STATIC method that invokes methods to 
+// redraw all plots cylically, starting with plot p.  This is a static method 
+// used by class Plot_Window and by the npoints_changed method in the main 
 // routine.
 void Plot_Window::redraw_all_plots( int p)
 {
   DEBUG( cout << "in redraw_all_plots(" << p << ")" << endl ) ;
 
-  // Redraw all plots cyclically, starting with plot p.  This p is important,
-  // since the draw() routine for a plot handles the selection region, and the
-  // active plot (the one where we are making the selection) must update the
-  // selected set and set arrays *before* all the other plots get redrawn.
+  // Redraw all plots cyclically, starting with plot p.  This p is important, 
+  // since the draw() routine for a plot handles the selection region, and the 
+  // active plot (the one where we are making the selection) must update the 
+  // selected set and set arrays *before* all the other plots get redrawn.  
   // Ugh.  Also, they are queued in reverse order, since is the order in which
   // fltk will actually draw() them (most recently defined gets drawn first).
   for( int i=0; i<nplots; i++) {
@@ -2221,8 +2221,8 @@ void Plot_Window::redraw_all_plots( int p)
     pws[j]->redraw();
     pws[j]->needs_redraw = 0;
   }
-
-  // R100_FIXES: Fix for WIN32 'slow-handler' bug.  If we could get rid of
+  
+  // R100_FIXES: Fix for WIN32 'slow-handler' bug.  If we could get rid of 
   // this call to Fl::flush, the WIN32 version would be faster.
   #ifdef __WIN32__
     Fl::flush();
@@ -2238,24 +2238,24 @@ void Plot_Window::run_timing_test()
 
   (void) gettimeofday(&tp, (struct timezone *)0);
   double start_time = (double)tp.tv_sec + 1.0E-6*(double)tp.tv_usec;
-
+  
   for (int i=0; i<nframes; i++) {
     invert_selection();
     Fl::check();  // this flushes all the pending redraws.
   }
-
+  
   (void) gettimeofday(&tp, (struct timezone *)0);
   double end_time = (double)tp.tv_sec + 1.0E-6*(double)tp.tv_usec;
 
   double elapsed_time = end_time - start_time;
   double fps = (double)nframes/elapsed_time;
-  cout << "Timing test results: " <<  fps
-       << " frames/sec, " << (double)npoints*nplots*fps
+  cout << "Timing test results: " <<  fps 
+       << " frames/sec, " << (double)npoints*nplots*fps 
        << " vertices/sec " << endl;
 }
 
 //***************************************************************************
-// Plot_Window::delete_selection( p) -- STATIC method to delete selected
+// Plot_Window::delete_selection( p) -- STATIC method to delete selected 
 // points.  This is a static method used only by class Plot_Window.
 void Plot_Window::delete_selection( Fl_Widget *o)
 {
@@ -2283,11 +2283,11 @@ void Plot_Window::delete_selection( Fl_Widget *o)
          << "first two points retained." << endl;
     sErrorMessage = "Tried to delete every data point, first two points retained.";
   }
-
-  // If the final index does not match the number of points, some point(s)
+  
+  // If the final index does not match the number of points, some point(s) 
   // got deleted and everyone's ranking must be recomputed
   if( ipoint != npoints)  {
-
+      
     // Update the number of points
     npoints = ipoint;
 
@@ -2308,8 +2308,8 @@ void Plot_Window::delete_selection( Fl_Widget *o)
 }
 
 //***************************************************************************
-// Plot_Window::invert_selection() -- STATIC method to invert selected and
-// nonselected points.  This is a static method used only by class
+// Plot_Window::invert_selection() -- STATIC method to invert selected and 
+// nonselected points.  This is a static method used only by class 
 // Plot_Window.
 void Plot_Window::invert_selection ()
 {
@@ -2330,7 +2330,7 @@ void Plot_Window::invert_selection ()
     }
     selection_is_inverted = true;
     // cout << "selection inverted" << endl;
-  }
+  } 
   else {
     // restore what we saved when inverting
     // XXX this clobbers any brushing done while the selection is inverted
@@ -2348,8 +2348,8 @@ void Plot_Window::invert_selection ()
 }
 
 //***************************************************************************
-// Plot_Window::toggle_display_selected( *o) -- STATIC method to toggle colors
-// of selected and unselected points. This is a static method used only by
+// Plot_Window::toggle_display_selected( *o) -- STATIC method to toggle colors 
+// of selected and unselected points. This is a static method used only by 
 // class Plot_Window.
 void Plot_Window::toggle_display_deselected( Fl_Widget *o)
 {
@@ -2365,8 +2365,8 @@ void Plot_Window::toggle_display_deselected( Fl_Widget *o)
 
 //***************************************************************************
 // Plot_Window::initialize_selection() -- STATIC method to clear all selections
-// without doing anything else that might lose the context.  This is a static
-// method used from main() during intialization and by
+// without doing anything else that might lose the context.  This is a static 
+// method used from main() during intialization and by 
 // Plot_Window::clear_selections.
 void Plot_Window::initialize_selection()
 {
@@ -2374,10 +2374,10 @@ void Plot_Window::initialize_selection()
   for( int i=0; i<nplots; i++) {
     pws[i]->reset_selection_box();
   }
-
+  
   // all points start out unselected (i.e. rendered using brush[0]);
-  brushes[0]->count = npoints;
-
+  brushes[0]->count = npoints; 
+  
   // no other brushes render anything to start out.
   for (int i=1; i<NBRUSHES; i++) {
     brushes[i]->count = 0;
@@ -2386,8 +2386,8 @@ void Plot_Window::initialize_selection()
 }
 
 //***************************************************************************
-// Plot_Window::clear_selections( *o) -- STATIC method to clear all selections,
-// resetall selected sets, and redraw all plots.  This is a static method used
+// Plot_Window::clear_selections( *o) -- STATIC method to clear all selections, 
+// resetall selected sets, and redraw all plots.  This is a static method used 
 // only by class Plot_Window.
 void Plot_Window::clear_selections( Fl_Widget *o)
 {
@@ -2397,15 +2397,15 @@ void Plot_Window::clear_selections( Fl_Widget *o)
 }
 
 //***************************************************************************
-// Plot_Window::select_on_string( *str, a_col) -- Search through all points,
-// using given column, a_col, as the "key".  Flag as "inside the footprint"
-// (i.e. painted by this "string search brush") only those points whose
+// Plot_Window::select_on_string( *str, a_col) -- Search through all points, 
+// using given column, a_col, as the "key".  Flag as "inside the footprint" 
+// (i.e. painted by this "string search brush") only those points whose 
 // corresponding ascii value matches the given string.
 void Plot_Window::select_on_string( const char *str, int a_col)
 {
   if( Data_File_Manager::column_info[a_col].hasASCII && a_col>=0) {
     for(int i=0;i<npoints;i++) {
-      const char *label_a =
+      const char *label_a = 
         Data_File_Manager::column_info[a_col].ascii_value(
           (int) Data_File_Manager::column_info[a_col].points(i)).c_str();
       inside_footprint(i) = (label_a && strstr(label_a,str))?1:0;
@@ -2444,8 +2444,8 @@ void Plot_Window::enable_antialiased_points ()
 // Initialize variables and state for use with point sprites
 
 //***************************************************************************
-// Plot_Window::make_sprite_textures() -- Define an array of pointers to data
-// that defines the textures for rendering with "symbols" (i.e. point sprites,
+// Plot_Window::make_sprite_textures() -- Define an array of pointers to data 
+// that defines the textures for rendering with "symbols" (i.e. point sprites, 
 // as opposed to rendering with vanilla openGL points.)
 void Plot_Window::make_sprite_textures()
 {
@@ -2469,7 +2469,7 @@ void Plot_Window::make_sprite_textures()
   spriteData[16] = (GLubyte *) Sprite_Textures::idata_18;
   spriteData[17] = (GLubyte *) Sprite_Textures::idata_19;
 
-  // Define sprite textures associated aith numbers and letters
+  // Define sprite textures associated aith numbers and letters  
   spriteData[18] = (GLubyte *) Sprite_Textures::idata_osaka_21;
   spriteData[19] = (GLubyte *) Sprite_Textures::idata_osaka_22;
   spriteData[20] = (GLubyte *) Sprite_Textures::idata_osaka_23;
@@ -2544,7 +2544,7 @@ void Plot_Window::initialize_sprites()
   cout << "Textures initialized!" << endl;
   glDisable( GL_TEXTURE_2D);
 }
-
+    
 //***************************************************************************
 // Plot_Window::enable_sprites() -- Invoke OpenGL routines to enable sprites
 void Plot_Window::enable_sprites(int sprite)
@@ -2561,7 +2561,7 @@ void Plot_Window::enable_sprites(int sprite)
 }
 
 //***************************************************************************
-// Plot_Window::clear_alpha_planes() -- Those filthy alpha planes!  It seems
+// Plot_Window::clear_alpha_planes() -- Those filthy alpha planes!  It seems 
 // that no matter how hard you try, you just can't keep them clean!
 void Plot_Window::clear_alpha_planes()
 {
@@ -2603,26 +2603,26 @@ void Plot_Window::initialize_VBO()
 {
   // Create a VBO. Index 0 is reserved.
   if (!VBOinitialized) {
-    glBindBuffer(GL_ARRAY_BUFFER, index+1);
+    glBindBuffer(GL_ARRAY_BUFFER, index+1);  
     CHECK_GL_ERROR ("creating VBO");
 
-    // Reserve enough space in openGL server memory VBO to hold all the
+    // Reserve enough space in openGL server memory VBO to hold all the 
     // vertices, but do not initilize it.
     glBufferData( GL_ARRAY_BUFFER, (GLsizeiptr) npoints*3*sizeof(GLfloat), (void *)NULL, GL_DYNAMIC_DRAW);
 
-    // Make sure we succeeded
+    // Make sure we succeeded 
     CHECK_GL_ERROR ("initializing VBO");
     cerr << " initialized VBO for plot window " << index << endl;
     VBOinitialized = 1;
   }
 }
-
+ 
 //***************************************************************************
 // Plot_Window::fill_VBO() -- Fill the VBO for this window
 void Plot_Window::fill_VBO()
 {
   if (!VBOfilled) {
-    glBindBuffer(GL_ARRAY_BUFFER, index+1);
+    glBindBuffer(GL_ARRAY_BUFFER, index+1);  
     void *vertexp = (void *)vertices.data();
     glBufferSubData( GL_ARRAY_BUFFER, (GLintptr) 0, (GLsizeiptr) (npoints*3*sizeof(GLfloat)), vertexp);
     CHECK_GL_ERROR("filling VBO");
@@ -2645,7 +2645,7 @@ void Plot_Window::initialize_indexVBO(int set)
 
 //***************************************************************************
 // Plot_Window::initialize_indexVBOs() -- Initialize set of index VBOs
-void Plot_Window::initialize_indexVBOs()
+void Plot_Window::initialize_indexVBOs() 
 {
   if (!indexVBOsinitialized) {
     for (int set=0; set<NBRUSHES; set++) {
@@ -2665,14 +2665,14 @@ void Plot_Window::fill_indexVBO(int set)
     blitz::Array<unsigned int, 1> tmpArray = indices_selected( set, blitz::Range(0,npoints-1));
     unsigned int *indices = (unsigned int *) (tmpArray.data());
     glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, (GLintptr) 0, (GLsizeiptr) (brushes[set]->count*sizeof(GLuint)), indices);
-    // make sure we succeeded
+    // make sure we succeeded 
     CHECK_GL_ERROR("filling index VBO");
   }
 }
 
 //***************************************************************************
 // Plot_Window::fill_indexVBOs() -- Fill all the index VBOs
-void Plot_Window::fill_indexVBOs()
+void Plot_Window::fill_indexVBOs() 
 {
   if (!indexVBOsfilled) {
     for (int set=0; set<NBRUSHES; set++) {
@@ -2684,7 +2684,7 @@ void Plot_Window::fill_indexVBOs()
 
 
 //***************************************************************************
-// Define global methods.  NOTE: Is it a good idea to do this here rather
+// Define global methods.  NOTE: Is it a good idea to do this here rather 
 // than global_definitions.h?
 
 //***************************************************************************
@@ -2714,10 +2714,10 @@ void circular_shift( blitz::Array<float,1> dst, blitz::Array<float,1> src, const
 }
 
 //***************************************************************************
-// moving_average( a, indices, half_width) -- Global method to calculate
+// moving_average( a, indices, half_width) -- Global method to calculate 
 // moving averages of BLITZ arrays
-void moving_average(
-  blitz::Array<float,1> a, const blitz::Array<int,1> indices,
+void moving_average( 
+  blitz::Array<float,1> a, const blitz::Array<int,1> indices, 
   const int half_width)
 {
   blitz::Array<float,1> tmp(npoints), a2(npoints);
@@ -2736,7 +2736,7 @@ void moving_average(
     tmp(i) = tmp(half_width);
     tmp(npoints-(i+1)) = tmp(npoints-(half_width+1));
   }
-
+  
   // Loop: unpermute and return moving average in a()
   for( int i=0; i<npoints; i++)
     a(indices(i)) = tmp(i)/(float)(2*half_width+1);
@@ -2744,32 +2744,32 @@ void moving_average(
 
 //***************************************************************************
 // cummulative_conditional( a, indices, half_width) -- Global method to
-// approximate the cummulative conditional probability of one array using
-// the (rank of) another array as the conditioning variable.  Input array a
+// approximate the cummulative conditional probability of one array using 
+// the (rank of) another array as the conditioning variable.  Input array a 
 // is over-written.
-// Note: Too slow.  There is obviously a clever, incremental way of doing
-// this more efficiently, such as by storing the elements in the current
-// window in an STL sorted container, and incrementally updating it as the
+// Note: Too slow.  There is obviously a clever, incremental way of doing 
+// this more efficiently, such as by storing the elements in the current 
+// window in an STL sorted container, and incrementally updating it as the 
 // window slides.  (or doing the whole thing on the GPU?).
 void cummulative_conditional(
-  blitz::Array<float,1> a, const blitz::Array<int,1> indices,
+  blitz::Array<float,1> a, const blitz::Array<int,1> indices, 
   const int half_width)
 {
   // If parameters are bogus then quit
   if (half_width < 1 || half_width > (npoints-1)/2) return;
 
-  // Loop: use sliding window in rank-ordered conditioning variable, window
-  // centered on index i.
+  // Loop: use sliding window in rank-ordered conditioning variable, window 
+  // centered on index i. 
   blitz::Array<float,1> tmp(npoints);
   tmp = 0;
   for (int i=0; i<npoints; i++) {
     // find leftmost and rightmost index elements of conditioning variable
     int left =max(i-half_width,0);
     int right=min(i+half_width,npoints-1);
-
-    // loop from leftmost to rightmost element in sliding window and determine
-    // conditional cummulative probablility (e.g. rank within the window) of
-    // the appropriate element from a(), which lies at the center of the
+    
+    // loop from leftmost to rightmost element in sliding window and determine 
+    // conditional cummulative probablility (e.g. rank within the window) of 
+    // the appropriate element from a(), which lies at the center of the 
     // window.
     float rank = 0;
     for (int j=left; j<=right; j++) {
@@ -2785,24 +2785,24 @@ void cummulative_conditional(
 }
 
 //***************************************************************************
-// fluctuation( a, indices, half_width) -- relative difference between a(i)
+// fluctuation( a, indices, half_width) -- relative difference between a(i) 
 // and local average of a. "local" is defined by rank passed in in indices.
 void fluctuation(
-  blitz::Array<float,1> a, const blitz::Array<int,1> indices,
+  blitz::Array<float,1> a, const blitz::Array<int,1> indices, 
   const int half_width)
 {
   // If parameters are bogus then quit
   if (half_width < 1 || half_width > (npoints-1)/2) return;
 
-  // Loop: use sliding window in rank-ordered conditioning variable, window
-  // centered on index i.
+  // Loop: use sliding window in rank-ordered conditioning variable, window 
+  // centered on index i. 
   blitz::Array<float,1> tmp(npoints);
   tmp = 0;
   for (int i=0; i<npoints; i++) {
     // find leftmost and rightmost index elements of conditioning variable
     int left =max(i-half_width,0);
     int right=min(i+half_width,npoints-1);
-
+    
     // could do fast incremental update instead of nested loop here.
     float mean = 0;
     for (int j=left; j<=right; j++) {
@@ -2819,7 +2819,7 @@ void fluctuation(
 
 
 //***************************************************************************
-// nicenum( xx, round) -- Find a 'nice number' approximately equal to xx.
+// nicenum( xx, round) -- Find a 'nice number' approximately equal to xx.  
 // If round==1, round this number, if round==0, take the ceiling.
 //
 // From: Nice Numbers for Graph Labels
@@ -2843,7 +2843,7 @@ double nicenum( const double xx, const double round)
     signum = +1;
   if( x<0)
     signum = -1;
-
+    
   expv = (int)floor(log10(x));
   f = x/expt(10., expv);		/* between 1 and 10 */
   if( round)
