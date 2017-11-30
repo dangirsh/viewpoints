@@ -24,9 +24,6 @@ RUN sudo apt-get update && sudo apt-get install -y \
     libxft-dev \
     subversion
 
-# RUN sudo apt-get update && sudo apt-get install -y \
-#     libboost-serialization-dev
-
 
 RUN wget -O fltk-1.3.0-source.tar.gz http://fltk.org/pub/fltk/1.3.0/fltk-1.3.0-source.tar.gz
 RUN tar -xzvf fltk-1.3.0-source.tar.gz
